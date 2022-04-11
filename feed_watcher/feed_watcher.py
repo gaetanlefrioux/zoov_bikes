@@ -35,9 +35,14 @@ class FeedWatcher():
         cursor.close()
 
     def run(self):
-        r = requests.get(self.config["feed_uri"], params=self.config["payload"])
-        data = r.json()
-        df = free_bike_status_parser.parse(data)
+        df_list = []
+        for feed_uri in self.config["feed_uris"]:
+            r = requests.get(feed_uri, params=self.config["payload"])
+            data = r.json()
+            df = free_bike_status_parser.parse(data)
+            df_list += [df]
+
+        df = pd.concat(df_list)
         print(len(df))
         df = df.rename(columns=self.config["name_mapping"])
         for col in self.config["timestamp_conversion"]:
@@ -46,5 +51,5 @@ class FeedWatcher():
         self.insert_dataframe(df, self.config["table"])
 
 if __name__ == '__main__':
-    feed_watcher = FeedWatcher("./configs/free_bike_status_bordeaux.json")
+    feed_watcher = FeedWatcher("./configs/free_bike_status.json")
     feed_watcher.run()
