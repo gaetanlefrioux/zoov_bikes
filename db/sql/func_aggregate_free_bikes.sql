@@ -48,16 +48,6 @@ RETURNS void AS $$
     rental_uri_android = EXCLUDED.rental_uri_android, rental_uri_ios = EXCLUDED.rental_uri_ios, last_reported = EXCLUDED.last_reported,
     free_state_start = least(bikes.free_state_start, EXCLUDED.last_reported);
 
-  -- update bikes that are not free anymore
-  update bikes
-  set
-    is_free = FALSE, free_state_start = NULL
-  where CONCAT(bikes.system_id, '', bikes.bike_id) not in (
-    select CONCAT(current_free_bikes.system_id, '', current_free_bikes.bike_id)
-    from current_free_bikes
-    where system_update_time = sys_update_time
-  );
-
   -- create new trip for bikes that are not free anymore
   insert into trips (
     system_id, bike_id, start_time, end_time,
@@ -69,6 +59,16 @@ RETURNS void AS $$
   from bikes
   where CONCAT(system_id, '', bike_id) not in (
     select CONCAT(system_id, '', bike_id)
+    from current_free_bikes
+    where system_update_time = sys_update_time
+  ) and is_free = TRUE;
+    
+  -- update bikes that are not free anymore
+  update bikes
+  set
+    is_free = FALSE, free_state_start = NULL
+  where CONCAT(bikes.system_id, '', bikes.bike_id) not in (
+    select CONCAT(current_free_bikes.system_id, '', current_free_bikes.bike_id)
     from current_free_bikes
     where system_update_time = sys_update_time
   );
