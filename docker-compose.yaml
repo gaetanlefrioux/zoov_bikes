@@ -33,11 +33,12 @@ services:
       PGADMIN_DEFAULT_PASSWORD: root
     ports:
       - "5050:80"
-  feed_watcher:
-    container_name: feed_watcher
+  free_bikes_saclay_watcher:
+    container_name: free_bikes_saclay_watcher
     depends_on:
       postgres:
         condition: service_healthy
     build: ./feed_watcher/
+    command: ["python3", "feed_watcher.py", "-c", "free_bike_status_saclay.json"]
     volumes:
     - ./feed_watcher/:/feed_watcher/

@@ -5,6 +5,7 @@ import pandas as pd
 import psycopg2
 from io import StringIO
 from time import perf_counter, sleep
+import argparse
 
 class FeedWatcher():
     def __init__(self, config_path):
@@ -89,5 +90,9 @@ class FeedWatcher():
 
 
 if __name__ == '__main__':
-    feed_watcher = FeedWatcher("./configs/free_bike_status_saclay.json")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--config", help="Path to the desired config file", required=True)
+
+    args = parser.parse_args()
+    feed_watcher = FeedWatcher(f"./configs/{args.config}")
     feed_watcher.run()
