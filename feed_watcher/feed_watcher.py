@@ -15,8 +15,14 @@ class FeedWatcher():
                 user="postgres",
                 password="pass"
             )
-            print(json.dumps(self.config, indent=4))
+            print(f"Starting feed watcher with config:\n{json.dumps(self.config, indent=4)}")
 
+    """
+        Insert a dataframe into the given table
+        params:
+            df: [pandas dataframe] Data to insert
+            table: [string] table where to insert
+    """
     def insert_dataframe(self, df, table):
         buffer = StringIO()
         df.to_csv(buffer, index=False, header=False)
@@ -27,29 +33,35 @@ class FeedWatcher():
             cursor.copy_from(buffer, table, sep=",", columns=df.columns.tolist())
             self.conn.commit()
         except (Exception, psycopg2.DatabaseError) as error:
-            print("Error: %s" % error)
             self.conn.rollback()
             cursor.close()
-            return 1
+            raise error
 
         cursor.close()
 
     def run(self):
-        df_list = []
-        for feed_uri in self.config["feed_uris"]:
-            r = requests.get(feed_uri, params=self.config["payload"])
-            data = r.json()
-            df = free_bike_status_parser.parse(data)
-            df_list += [df]
+        r = requests.get(self.config["feed_uri"], params=self.config["payload"])
+        data = r.json()
+        timestamp = pd.to_datetime(data["last_updated"], unit="s")
+        df = free_bike_status_parser.parse(data)
 
-        df = pd.concat(df_list)
-        print(len(df))
         df = df.rename(columns=self.config["name_mapping"])
         for col in self.config["timestamp_conversion"]:
             df[col] = pd.to_datetime(df[col], unit="s")
 
+        print(f"Inserting {len(df)} free bikes for timestamp {timestamp}")
         self.insert_dataframe(df, self.config["table"])
 
+        if "sql_function" in self.config and self.config["sql_function"]:
+            cursor = self.conn.cursor()
+            print(f"Calling SQL function {self.config['sql_function']}")
+            cursor.callproc(self.config['sql_function'], [str(timestamp),])
+            cursor.close()
+            self.conn.commit()
+
+
+
+
 if __name__ == '__main__':
-    feed_watcher = FeedWatcher("./configs/free_bike_status.json")
+    feed_watcher = FeedWatcher("./configs/free_bike_status_saclay.json")
     feed_watcher.run()

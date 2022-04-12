@@ -39,10 +39,11 @@ CREATE TABLE IF NOT EXISTS trips (
   system_id  VARCHAR NOT NULL,
   bike_id VARCHAR NOT NULL,
   start_time TIMESTAMP NOT NULL,
-  end_time TIMESTAMP NOT NULL,
+  end_time TIMESTAMP,
   start_lat REAL NOT NULL,
   start_lon REAL NOT NULL,
   end_lat REAL,
   end_lon REAL,
+  pricing_plan_id VARCHAR NOT NULL,
   PRIMARY KEY (system_id, bike_id, start_time)
 );
