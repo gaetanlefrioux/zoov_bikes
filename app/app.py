@@ -50,25 +50,31 @@ def bikes_statistics():
     by_bikes = select_to_json("""
         SELECT bike_id,
         	sum(calculate_distance(start_lat, start_lon, end_lat, end_lon, 'K')) as total_distance,
-        	EXTRACT(MINUTE FROM sum(end_time - start_time)) as total_time
+        	sum(end_time - start_time) as total_time,
+            count(*) as total_trip_count
         FROM trips
         where end_time is not NULL and start_time > %s
         group by system_id, bike_id
         order by sum(calculate_distance(start_lat, start_lon, end_lat, end_lon, 'K')) desc;
     """, (min_date,))
 
+    for b in by_bikes:
+        b["total_time"] = str(b["total_time"])
+
     total = select_to_json("""
         SELECT
         	sum(calculate_distance(start_lat, start_lon, end_lat, end_lon, 'K')) as total_distance,
-        	EXTRACT(MINUTE FROM sum(end_time - start_time)) as total_time
+        	sum(end_time - start_time) as total_time,
+            count(*) as total_trip_count
         FROM trips
-        where end_time is not NULL
-    """)
+        where end_time is not NULL and start_time > %s
+    """, (min_date,))
 
     results = {
         "global": {
             "total_distance": total[0]["total_distance"] if len(total) > 0 else 0,
-            "total_time": total[0]["total_time"] if len(total) > 0 else 0
+            "total_time": str(total[0]["total_time"]) if len(total) > 0 else 0,
+            "total_trip_count": total[0]["total_trip_count"] if len(total) > 0 else 0,
         },
         "by_bikes": by_bikes
     }

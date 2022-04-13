@@ -1,4 +1,4 @@
-let col_order = ["bike_id", "total_distance", "total_time"];
+let col_order = ["bike_id", "total_distance", "total_time", "total_trip_count"];
 let input_to_name = {
   "hourWindowInput": "hour_window"
 };
@@ -22,6 +22,7 @@ function update_template(data) {
 
   document.getElementById("total-distance").textContent = data["global"]["total_distance"];
   document.getElementById("total-time").textContent = data["global"]["total_time"];
+  document.getElementById("total-trip").textContent = data["global"]["total_trip_count"];
 }
 
 function build_url() {
