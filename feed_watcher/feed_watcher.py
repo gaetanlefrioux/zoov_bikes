@@ -1,11 +1,11 @@
 import json
 import requests
-from parser import free_bike_status_parser
 import pandas as pd
 import psycopg2
 from io import StringIO
 from time import perf_counter, sleep
 import argparse
+import importlib.util
 
 class FeedWatcher():
     def __init__(self, config_path):
@@ -18,6 +18,10 @@ class FeedWatcher():
                 password="pass"
             )
             print(f"Starting feed watcher with config:\n{json.dumps(self.config, indent=4)}")
+        parser_spec = importlib.util.spec_from_file_location("parser", f"./parser/{self.config['parser']}.py")
+        parser = importlib.util.module_from_spec(parser_spec)
+        parser_spec.loader.exec_module(parser)
+        self.parser = parser
 
     """
         Insert a dataframe into the given table
@@ -47,7 +51,7 @@ class FeedWatcher():
             data: [dict] data coming from the feed in json format
     """
     def ingest_data(self, data):
-        df = free_bike_status_parser.parse(data)
+        df = self.parser.parse(data)
 
         df = df.rename(columns=self.config["name_mapping"])
         for col in self.config["timestamp_conversion"]:
