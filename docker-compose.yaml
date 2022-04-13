@@ -42,3 +42,12 @@ services:
     command: ["python3", "feed_watcher.py", "-c", "free_bike_status_saclay.json"]
     volumes:
     - ./feed_watcher/:/feed_watcher/
+  web_app:
+    container_name: web_app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    build:
+      context: ./app/
+    ports:
+    - 8000:5000

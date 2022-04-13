@@ -1,0 +1,60 @@
+<html>
+  <head>
+    <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+    rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+    crossorigin="anonymous">
+    <link href={{ url_for('static', filename='style.css') }} rel="stylesheet">
+    <title>{{ title }}</title>
+  </head>
+  <body>
+    <div class="container-fluid">
+    <div class="row">
+      <div id="formContainer" class="col-lg-3">
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Latitude</span>
+          </div>
+          <input id="latitudeInput" type="text" value="48.731243" class="form-control">
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Longitude</span>
+          </div>
+          <input id="longitudeInput" value="2.171251" type="text" class="form-control">
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Free since (min)</span>
+          </div>
+          <input id="freeSinceInput" value="1440" type="number" class="form-control">
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Max distance (m)</span>
+          </div>
+          <input id="maxDistanceInput" value="5000" type="number" class="form-control">
+        </div>
+      </div>
+      <div class="col-lg-9">
+        <table class="table" id="freebikes">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Bike ID</th>
+              <th scope="col">Latitude</th>
+              <th scope="col">Longitude</th>
+              <th scope="col">Vehicule Type</th>
+              <th scope="col">Autonomy</th>
+              <th scope="col">Distance (m)</th>
+              <th scope="col">Free since</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  </body>
+  <script src="{{ url_for('static', filename='watch_free_bikes.js') }}"></script>
+</html>
