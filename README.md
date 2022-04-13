@@ -11,13 +11,13 @@ A simple `docker-compose up --build` in the root directory will build and run al
 ### Feed Watcher
 
 This component is written in `Python`.
-The feed_watcher is taking care of tracking updates from the given feed.
+The [feed_watcher](https://github.com/gaetanlefrioux/zoov_bikes/blob/main/feed_watcher/feed_watcher.py) is taking care of tracking updates from the given feed.
 The feed_watcher is parsing and formatting the feed data before loading them to the specified table in the database.
 
 Each feed_watcher is accepting a JSON configuration file which tells: the url of the data feed, the parser to use, how to map the fields with the database, ...
 
 Here only one feed_watcher is used to track data from the [free_bikes_status feed for Saclay/South Paris](https://gateway.prod.zoov.io/gbfs/2.2/saclay/en/free_bike_status.json?key=NGFlMjU3MDUtNDk5My00MTM4LTk1ZjctNmNlNDM1MWQ0NjE1).
-His configuration file can be found [here](https://github.com/gaetanlefrioux/zoov_bikes/blob/main/feed_watcher/configs/free_bike_status_saclay.json).
+Its configuration file can be found [here](https://github.com/gaetanlefrioux/zoov_bikes/blob/main/feed_watcher/configs/free_bike_status_saclay.json).
 
 
 
@@ -25,7 +25,7 @@ His configuration file can be found [here](https://github.com/gaetanlefrioux/zoo
 
 The `postgres` service holds a PostgreSQL database where the feed data are aggregated and stored
 
-The tables used to stored the data are defined [here](https://github.com/gaetanlefrioux/zoov_bikes/blob/main/db/sql/create_tables.sql)<br>
+The tables used to stored the data are defined [here](https://github.com/gaetanlefrioux/zoov_bikes/blob/main/db/sql/create_tables.sql).<br>
 The logic to aggregate the new data coming from the feed is defined as a SQL function [here](https://github.com/gaetanlefrioux/zoov_bikes/blob/main/db/sql/func_aggregate_free_bikes.sql) for sake of performance.
 
 Additionally, a pgadmin4 container is also running alongside the PostgreSQL container to facilitate monitoring of the database.
