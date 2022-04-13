@@ -37,5 +37,47 @@ def free_bikes():
         mimetype='application/json'
     )
 
+@app.route("/bikes_statistics")
+def bike_statistics_template():
+     return render_template('bikes_statistics.html', title='Zoov bikes statistics')
+
+@app.route("/api/bikes_statistics")
+def bikes_statistics():
+    current_time = datetime.now().astimezone(pytz.utc)
+    hour_window = request.args.get("hour_window", default=24, type=float)
+    min_date = current_time - timedelta(hours=hour_window)
+
+    by_bikes = select_to_json("""
+        SELECT bike_id,
+        	sum(calculate_distance(start_lat, start_lon, end_lat, end_lon, 'K')) as total_distance,
+        	EXTRACT(MINUTE FROM sum(end_time - start_time)) as total_time
+        FROM trips
+        where end_time is not NULL and start_time > %s
+        group by system_id, bike_id
+        order by sum(calculate_distance(start_lat, start_lon, end_lat, end_lon, 'K')) desc;
+    """, (min_date,))
+
+    total = select_to_json("""
+        SELECT
+        	sum(calculate_distance(start_lat, start_lon, end_lat, end_lon, 'K')) as total_distance,
+        	EXTRACT(MINUTE FROM sum(end_time - start_time)) as total_time
+        FROM trips
+        where end_time is not NULL
+    """)
+
+    results = {
+        "global": {
+            "total_distance": total[0]["total_distance"] if len(total) > 0 else 0,
+            "total_time": total[0]["total_time"] if len(total) > 0 else 0
+        },
+        "by_bikes": by_bikes
+    }
+
+    return app.response_class(
+        response=json.dumps(results),
+        status=200,
+        mimetype='application/json'
+    )
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0")

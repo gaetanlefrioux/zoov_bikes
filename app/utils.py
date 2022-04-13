@@ -1,4 +1,5 @@
 import psycopg2
+from flask import json
 
 conn_info = {
     "host": "pg_container",
@@ -7,7 +8,7 @@ conn_info = {
     "password": "pass"
 }
 
-def select_to_json(select_sql, args):
+def select_to_json(select_sql, args=None):
     conn = psycopg2.connect(**conn_info)
     cursor = conn.cursor()
     cursor.execute(select_sql, args)
